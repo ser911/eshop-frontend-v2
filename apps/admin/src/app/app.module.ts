@@ -1,10 +1,11 @@
 //General
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { RouterModule, Routes } from '@angular/router';
+import { AuthGuard, JwtInterceptor, UsersModule } from '@eshop-frontend/users';
 
 //Components
 import { AppComponent } from './app.component';
@@ -37,7 +38,10 @@ import { EditorModule } from 'primeng/editor';
 import { PaginatorModule } from 'primeng/paginator';
 import { TagModule } from 'primeng/tag';
 import { InputMaskModule } from 'primeng/inputmask';
-
+import { OrdersListComponent } from './pages/orders/orders-list/orders-list.component';
+import { OrdersDetailComponent } from './pages/orders/orders-detail/orders-detail.component';
+import { BadgeModule } from 'primeng/badge';
+import { FieldsetModule } from 'primeng/fieldset';
 
 
 //PrimeNg modules array
@@ -57,7 +61,9 @@ const UX_MODULES = [
                     EditorModule,
                     PaginatorModule,
                     TagModule,
-                    InputMaskModule
+                    InputMaskModule,
+                    BadgeModule,
+                    FieldsetModule
                   ];
 
 
@@ -66,8 +72,9 @@ const routes: Routes = [
   {
     path: '',
     component: ShellComponent,
+    canActivate: [AuthGuard],
     children: [
-      { path: 'dashboard', component: DashboardComponent },
+      { path: '', component: DashboardComponent },
       { path: 'categories', component: CategoriesListComponent },
       { path: 'categories/form', component: CategoriesFormComponent },
       { path: 'categories/form/:id', component: CategoriesFormComponent },
@@ -77,6 +84,10 @@ const routes: Routes = [
       { path: 'users', component: UsersListComponent },
       { path: 'users/form', component: UsersFormComponent },
       { path: 'users/form/:id', component: UsersFormComponent },
+      { path: 'orders', component: OrdersListComponent },
+      { path: 'orders/:id', component: OrdersDetailComponent },
+      {path: '**', redirectTo: '', pathMatch: 'full'}
+
     ],
   },
 ];
@@ -94,7 +105,9 @@ const routes: Routes = [
      ProductsListComponent,
      ProductsFormComponent,
      UsersListComponent,
-     UsersFormComponent
+     UsersFormComponent,
+     OrdersListComponent,
+     OrdersDetailComponent
      ],
   imports: [
     BrowserModule,
@@ -102,10 +115,13 @@ const routes: Routes = [
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule.forRoot(routes, { initialNavigation: 'enabledBlocking' }),
+    RouterModule.forRoot(routes, { initialNavigation: 'enabled' }),
+    UsersModule,
     ...UX_MODULES
   ],
-  providers: [CategoriesService, MessageService, ConfirmationService],
+  providers: [CategoriesService, MessageService, ConfirmationService,
+  {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true}
+  ],
   bootstrap: [AppComponent],
 })
 

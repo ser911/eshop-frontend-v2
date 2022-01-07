@@ -49,6 +49,7 @@ countries = [];
   }
 
   private _getCountries(){
+    
     this.countries = this.usersService.getCountries();
     console.log(this.countries);
   }
